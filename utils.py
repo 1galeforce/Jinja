@@ -3,7 +3,6 @@ def movie_stars(movie_dict):
     movie['stars'] = add_stars(movie['rating'])
   return movie_dict
 
-
 def add_stars(rating):
   my_return = ""
   for x in range(5):
@@ -12,3 +11,4 @@ def add_stars(rating):
     checked_star = "checked" if rating >= x + 0.5 else ""
     my_return += f"<span class=\"fa {full_star} {half_star} {checked_star}\"></span>"
   return my_return
+

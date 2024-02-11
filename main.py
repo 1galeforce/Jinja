@@ -12,6 +12,14 @@ from models import db
 from models.category import Category
 from models.recipe import Recipe
 
+#flask-admin
+from flask_admin import Admin
+from flask_admin.contrib.sqla import ModelView
+
+
+
+
+
 app = Flask(__name__)
 
 app.config['SECRET_KEY'] = os.environ.get('FLASK_SECRET_KEY', 'default_secret_key')
@@ -43,38 +51,20 @@ def users():
 
   return render_template("users.html",**context)
 
-@app.route("/recipes")
-def recipes():
-    all_recipes = Recipe.query.all()
-    title = "Recipes"
-    context = {
-      "title": title,
-      "recipes": all_recipes
-    }
-    return render_template("recipes.html", **context)
 
-@app.route("/recipe/<int:recipe_id>")
-def recipe(recipe_id):
-    this_recipe = Recipe.query.get(recipe_id)
-    title = "Recipe"
-    context = {
-      "title": "Recipe",
-      "recipe": this_recipe
-    }
-    if this_recipe:
-        return render_template('recipe.html', **context)
-    else:
-        return render_template("404.html",title="404"), 404
-
-
-def load_user_data(user_number):
+@app.route('/user/<int:user_number>')
+def user(user_number):
   # Read project data from JSON file
   with open('test.json') as json_file:
       user_data = json.load(json_file)
-      user = next((u for u in user_data if u['id'] == user_number), None)
-      return user
-
+      this_user = user_data[user_number]
+  title = "User"
+  context = {
+    "title": title,
+    "user":  this_user
+  }
   return render_template("user.html", **context)
+
 
 # Route for the form page
 @app.route('/register', methods=['GET', 'POST'])
@@ -139,6 +129,39 @@ def movies():
     }   
   
     return render_template("movies.html",**context)
+  
+@app.route("/recipes")
+def recipes():
+      all_recipes = Recipe.query.all()
+      title = "Recipes"
+      context = {
+        "title": title,
+        "recipes": all_recipes
+      }
+      return render_template("recipes.html", **context)
+
+@app.route("/recipe/<int:recipe_id>")
+def recipe(recipe_id):
+      this_recipe = Recipe.query.get(recipe_id)
+      title = "Recipe"
+      context = {
+        "title": "Recipe",
+        "recipe": this_recipe
+      }
+      if this_recipe:
+          return render_template('recipe.html', **context)
+      else:
+          return render_template("404.html",title="404"), 404
+
+#flask-admin
+class RecipeView(ModelView):
+  column_searchable_list = ['name', 'author']
+
+admin = Admin(app)
+admin.url = '/admin/' #would not work on repl w/o this!
+admin.add_view(RecipeView(Recipe, db.session))
+admin.add_view(ModelView(Category, db.session))
+
 
 with app.app_context():
   db.create_all()
