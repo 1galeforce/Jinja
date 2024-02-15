@@ -12,15 +12,26 @@
      <p>Description: {{ recipe.description }}</p>
      <p>Ingredients: {{ recipe.ingredients }}</p>
      <p>Instructions: {{ recipe.instructions }}</p>
-     <p>Rating: {{ recipe.rating }}</p>
+     <p>Rating: {{ recipe.rating }} {{ stars|safe }}</p>
    </div>
 
+
+  <div class="w3-container">
+    
+    <i class="fa fa-spinner fa-spin" style="font-size:54px;color:cyan"></i>
+     <i class="fa fa-spinner fa-spin" style="font-size:34px;color:darkred"></i>
+     <i class="fa fa-spinner fa-spin" style="font-size:24px;color:black"></i>
+ 
+  </div>
+       
+               
    <footer class="w3-container w3-light-grey">
      <h5><em>Category: {{ recipe.category.name }}</em></h5>
      
-     <p><a href="/recipies">back</a></p>
+   
+     <p><a href="/recipes">back</a></p>
    </footer>
-
+  </div>
    </div>
    </div>
 {% endblock %}

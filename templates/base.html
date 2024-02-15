@@ -17,6 +17,9 @@
 .checked {
   color: gold;
 }
+
+  
+
 </style>
     
     <style>
@@ -28,6 +31,22 @@
           display: flex;
           justify-content: space-evenly;
        }
+
+
+      /* colors for flash messages */
+      .error{
+        background-color:red;
+      }
+
+      .success{
+        background-color:blue;
+      }
+
+      .warning{
+        background-color:yellow;
+      }
+
+
     </style>
 
 
@@ -46,7 +65,18 @@
           <a href="/recipes" class="w3-bar-item w3-button">Recipes</a>
           <a href="/admin" class="w3-bar-item w3-button">Admin</a>
     </nav> 
-
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+        <div class="w3-panel {{ category }}" style="max-width:500px; position:relative">
+          <span onclick="this.parentElement.style.display='none'"
+          class="w3-button w3-large w3-display-topright">&times;</span>
+          <h3>{{ category.title() }}</h3>
+             <p>{{ message }}</p>
+          {% endfor %}
+        </div> 
+      {% endif %}
+    {% endwith %}
       
   {% block content %}
   {% endblock %}

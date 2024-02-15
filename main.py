@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, url_for
+from flask import Flask, render_template, request, url_for, redirect, flash
 
 #create a secret key for security
 import os
@@ -8,6 +8,8 @@ import json
 
 import utils as util
 
+from forms import RecipeAdd
+
 from models import db
 from models.category import Category
 from models.recipe import Recipe
@@ -15,10 +17,6 @@ from models.recipe import Recipe
 #flask-admin
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
-
-
-
-
 
 app = Flask(__name__)
 
@@ -107,8 +105,8 @@ def paris():
 
 @app.route('/flatironbldg')
 def flatironbldg():
-  title = "Flat Iron Building"
-  return render_template("flatironbldg.html", title=title)
+    title = "Flat Iron Building"
+    return render_template("flatironbldg.html", title=title)
 
 movie_dict = [
   {"title":"Playtime", "genre":"Comedy", "rating":2.5},
@@ -130,28 +128,72 @@ def movies():
   
     return render_template("movies.html",**context)
   
+
+
+@app.route('/add_recipe', methods=['GET', 'POST'])
+def add_recipe():
+    form = RecipeAdd()
+
+    # Populate the category choices dynamically
+    form.category_id.choices = [(category.id, category.name) for category in Category.query.all()]
+
+    if request.method == 'POST' and form.validate_on_submit():
+        # Create a new recipe instance and add it to the database
+        new_recipe = Recipe(
+            name=form.name.data,
+            author=form.author.data,
+            description=form.description.data,
+            ingredients=form.ingredients.data,
+            instructions=form.instructions.data,
+            rating=form.rating.data,
+            category_id=form.category_id.data
+        )
+        db.session.add(new_recipe)
+        db.session.commit()
+
+        #inform user of success!
+        flash('Recipe added successfully!', 'success')
+        return redirect(url_for('recipes'))
+
+    #form did NOT validate
+    if request.method == 'POST' and not form.validate():
+          for field, errors in form.errors.items():
+              for error in errors:
+                  flash(f"Error in {field}: {error}", 'error')
+          return render_template('add_recipe.html', form=form)
+
+    #default via GET shows form  
+    return render_template('add_recipe.html', form=form)
+
+
 @app.route("/recipes")
 def recipes():
-      all_recipes = Recipe.query.all()
-      title = "Recipes"
-      context = {
-        "title": title,
-        "recipes": all_recipes
-      }
-      return render_template("recipes.html", **context)
+    all_recipes = Recipe.query.all()
+    #all_recipes = util.recipe_stars(all_recipes)
+    title = "Recipes"
+    context = {
+      "title": title,
+      "recipes": all_recipes
+    }
+    return render_template("recipes.html", **context)
 
 @app.route("/recipe/<int:recipe_id>")
 def recipe(recipe_id):
-      this_recipe = Recipe.query.get(recipe_id)
-      title = "Recipe"
-      context = {
-        "title": "Recipe",
-        "recipe": this_recipe
-      }
-      if this_recipe:
-          return render_template('recipe.html', **context)
-      else:
-          return render_template("404.html",title="404"), 404
+    this_recipe = db.session.get(Recipe, recipe_id)
+    if not this_recipe:
+      return render_template("404.html",title="404"), 404
+    stars = util.add_stars(this_recipe.rating)
+    # print(stars)
+    title = "Recipe"
+    context = {
+      "title": "Recipe",
+      "recipe": this_recipe,
+      "stars": stars
+    }
+    return render_template("recipe.html", **context)
+ 
+
+
 
 #flask-admin
 class RecipeView(ModelView):

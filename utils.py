@@ -3,6 +3,11 @@ def movie_stars(movie_dict):
     movie['stars'] = add_stars(movie['rating'])
   return movie_dict
 
+def recipe_stars(recipes):
+  for recipe in recipes:
+    recipe.rating = add_stars(recipe.rating)
+  return recipes
+
 def add_stars(rating):
   my_return = ""
   for x in range(5):

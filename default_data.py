@@ -10,7 +10,7 @@ DEFAULT_RECIPES = [
         'instructions': 'Cook the eggs and ham. Add green food coloring for fun!',
         'rating': 5.0,
         'category_name': 'Breakfast'
-      <i class='fas fa-egg' style='font-size:24px'></i>
+
     },
     {
         'name': 'Spaghetti Ice Cream',
