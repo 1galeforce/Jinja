@@ -1,16 +1,13 @@
-<!-- templates/add_recipe.html -->
+<!--templates/edit_recipe.html -->
 {% extends 'base.html' %}
 {% block content %}
-    <h1>Add Recipe</h1>
-    <form method="post" action="{{ url_for('add_recipe') }}"  class="main-form">
-      {{ form.hidden_tag() }}
+<h1>Edit Recipe</h1>
+<form method="POST" action="{{ url_for('add_recipe') }}"  class="main-form">
+  {{ form.hidden_tag() }}
+    
       <div>
         {{ form.name.label }}<br>
         {{ form.name }}
-      </div>
-      <div>
-          {{ form.author.label }}<br>
-          {{ form.author}}
       </div>
       <div>
           {{ form.description.label }}<br>
@@ -32,8 +29,8 @@
           {{ form.category_id.label }}<br>
           {{ form.category_id }}
       </div>
-      
-     
-      <div><button type="submit">Add Recipe</button></div>
+
+
+      <div><button type="submit">Update Recipe</button></div>
     </form>
 {% endblock %}

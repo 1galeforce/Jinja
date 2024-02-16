@@ -9,7 +9,7 @@ DEFAULT_RECIPES = [
         'ingredients': 'Eggs, Ham, Food coloring',
         'instructions': 'Cook the eggs and ham. Add green food coloring for fun!',
         'rating': 5.0,
-        'category_name': 'Breakfast'
+        'category_name': 'Breakfast' 
 
     },
     {
