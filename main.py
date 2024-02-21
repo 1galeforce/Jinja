@@ -1,26 +1,31 @@
-from flask import Flask, render_template, request, url_for, redirect, flash
+# We are using a json file for data
+import json
 
 #create a secret key for security
 import os
 
-# We are using a json file for data
-import json
-
-import utils as util
-
-#wtf forms import
-from forms import RecipeAdd, RecipeEdit
-
-#add CSRF protection to forms
-from flask_wtf import CSRFProtect
-
-from models import db
-from models.category import Category
-from models.recipe import Recipe
+from flask import Flask, flash, redirect, render_template, request, url_for
 
 #flask-admin
 from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
+
+#add CSRF protection to forms
+from flask_wtf import CSRFProtect
+
+import utils as util
+
+#wtf forms import
+from forms import RecipeAdd, RecipeEdit, LoginForm, RegistrationForm
+from models import db
+from models.category import Category
+from models.chef import Chef
+
+
+from models.recipe import Recipe
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash
+
 
 app = Flask(__name__)
 
@@ -33,8 +38,86 @@ csrf = CSRFProtect(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///recipes.db'
 db.init_app(app)
 
+#setup login
+login_manager = LoginManager()
+login_manager.login_view = 'login'
+login_manager.init_app(app)
+
+
+#LOGIN MANAGER
+@login_manager.user_loader
+def load_user(user_id):
+    return db.session.get(Chef, int(user_id))
+
+#LOGIN
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    title = "Chez Chef"
+    # Override next on query string to display warning
+    next_url = request.args.get('next')
+    if next_url:
+        flash('Please log in to access this page.', 'warning')
+
+    form = LoginForm()
+    if form.validate_on_submit():
+        chef = Chef.query.filter_by(email=form.email.data).first()
+        if chef and chef.check_password(form.password.data):
+            login_user(chef)
+            next_page = request.args.get('next')
+            flash('Login Successful!', 'success')
+            return redirect(next_page or url_for('index'))
+        else:
+            flash('Login or password incorrect', 'error')
+
+    #form did NOT validate
+    if request.method == 'POST' and not form.validate():
+          for field, errors in form.errors.items():
+              for error in errors:
+                  flash(f"Error in {field}: {error}", 'error')
+    context = {
+        "title": title,
+        "form": form
+    }
+    return render_template('login.html',**context)
+
+#LOGOUT
+@app.route('/logout')
+def logout():
+    logout_user()
+    flash('Logout Successful!', 'success')
+    return redirect(url_for('index'))
+
+#SIGN_UP
+@app.route('/sign_up', methods=['GET', 'POST'])
+def sign_up():
+    title = "Chez Chef"
+    form = RegistrationForm()
+    if form.validate_on_submit():
+        chef= Chef(first_name=form.first_name.data,
+                     last_name=form.last_name.data,
+                     email=form.email.data)
+        chef.set_password(form.password.data)
+        db.session.add(chef)
+        db.session.commit()
+        flash('Registration successful! Please log in.', 'success')
+        return redirect(url_for('login'))
+    #form did NOT validate
+    if request.method == 'POST' and not form.validate():
+        for field, errors in form.errors.items():
+            for error in errors:
+                flash(f"Error in {field}: {error}", 'error')
+
+    context = {
+        "title": title,
+        "form": form
+    }
+    return render_template('sign_up.html', **context)
+
+
+
 #DELETE
 @app.route('/delete_recipe/<int:id>', methods=['POST'])
+@login_required
 def delete_recipe(id):
     recipe = Recipe.query.get_or_404(id)
     db.session.delete(recipe)
@@ -45,6 +128,7 @@ def delete_recipe(id):
 
 #EDIT RECIPE
 @app.route('/edit_recipe/<int:recipe_id>', methods=['GET', 'POST'])
+@login_required
 def edit_recipe(recipe_id):
     # Retrieve the recipe from the database
     recipe = Recipe.query.get_or_404(recipe_id)
@@ -180,6 +264,7 @@ def movies():
 
 
 @app.route('/add_recipe', methods=['GET', 'POST'])
+@login_required
 def add_recipe():
     form = RecipeAdd()
 
@@ -189,13 +274,13 @@ def add_recipe():
     if request.method == 'POST' and form.validate_on_submit():
         # Create a new recipe instance and add it to the database
         new_recipe = Recipe(
-            name=form.name.data,
-            author=form.author.data,
-            description=form.description.data,
-            ingredients=form.ingredients.data,
-            instructions=form.instructions.data,
-            rating=form.rating.data,
-            category_id=form.category_id.data
+        name=form.name.data,
+        author=form.author.data,
+        description=form.description.data,
+        ingredients=form.ingredients.data,
+        instructions=form.instructions.data,
+        rating=form.rating.data,
+        category_id=form.category_id.data
         )
         db.session.add(new_recipe)
         db.session.commit()
@@ -233,7 +318,6 @@ def recipe(recipe_id):
       return render_template("404.html",title="404"), 404
     stars = util.add_stars(this_recipe.rating)
     # print(stars)
-    title = "Recipe"
     context = {
       "title": "Recipe",
       "recipe": this_recipe,
@@ -252,7 +336,7 @@ admin = Admin(app)
 admin.url = '/admin/' #would not work on repl w/o this!
 admin.add_view(RecipeView(Recipe, db.session))
 admin.add_view(ModelView(Category, db.session))
-
+admin.add_view(ModelView(Chef, db.session))
 
 with app.app_context():
   db.create_all()

@@ -2,12 +2,16 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1>Edit Recipe</h1>
-<form method="POST" action="{{ url_for('add_recipe') }}"  class="main-form">
+<form method="POST"  class="main-form">
   {{ form.hidden_tag() }}
     
       <div>
         {{ form.name.label }}<br>
         {{ form.name }}
+      </div>
+      <div>
+      {{ form.author.label }}<br>
+      {{ form.author }}
       </div>
       <div>
           {{ form.description.label }}<br>
