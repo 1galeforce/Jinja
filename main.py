@@ -52,7 +52,7 @@ def load_user(user_id):
 #LOGIN
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    title = "Chez Chef"
+    title = "Chef de cuisine ou Chef cuisinier à domicile "
     # Override next on query string to display warning
     next_url = request.args.get('next')
     if next_url:
@@ -90,7 +90,7 @@ def logout():
 #SIGN_UP
 @app.route('/sign_up', methods=['GET', 'POST'])
 def sign_up():
-    title = "Chez Chef"
+    title = "Chef de cuisine ou Chef cuisinier à domicile"
     form = RegistrationForm()
     if form.validate_on_submit():
         chef= Chef(first_name=form.first_name.data,

@@ -1,28 +1,36 @@
 <!-- templates/sign_up.html -->
 {% extends 'base.html' %}
 {% block content %}
-    <h3>S'il vous plait enregistrez vous</h3>
+    <style>
+
+      h3 {text-align: center;} 
+      p {text-align: center}
+    </style>
+
+
+<h3>Enregistrez-vous s'il vous plait</h3>
 <p>If you'd like to add, edit or delete recipes, please sign up below.</p>
 <p>Don't forget to write down your password, as it will be unrecoverable.</p>
-<p>bon appetit!</p>
+<p>Bon Appetit!</p>
     <form method="post">
         {{ form.hidden_tag() }}
+       
         <div>
-            {{ form.first_name.label }}: {{ form.first_name }}
+            {{ form.first_name.label }}: {{ form.first_name }}<br>
         </div>
         <div>
-            {{ form.last_name.label }}: {{ form.last_name }}
+            {{ form.last_name.label }}: {{ form.last_name }}<br>
         </div>
         <div>
-            {{ form.email.label }}: {{ form.email }}
+            {{ form.email.label }}: {{ form.email }}<br>
         </div>
         <div>
-            {{ form.password.label }}: {{ form.password }}
+            {{ form.password.label }}: {{ form.password }}<br>
         </div>
         <div>
-            {{ form.confirm_password.label }}: {{ form.confirm_password }}
+            {{ form.confirm_password.label }}: {{ form.confirm_password }}<br>
         </div>
-        <button type="submit">Register</button>
+        <button type="submit">Register</button><br>
     </form>
 
 {% endblock %}
